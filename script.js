@@ -1,84 +1,77 @@
 // Data untuk dropdown Lowongan
-var lowonganData = ["Database Developer", "System Analyst", "Front End Developer"];
+var lowonganData = ["System Administrator", "Programmer", "Technical Writter"];
 
 // Data untuk dropdown Posisi
 var posisiData = ["Jakarta", "Bandung"];
 
-// Ambil elemen dropdown Lowongan dan Posisi
-var lowonganDropdown = document.getElementById("vacancy");
-var posisiDropdown = document.getElementById("posisi");
+// Simpan data yang telah disubmit secara lokal menggunakan variable Array
+let dataPendaftar = [];
 
-// Tambahkan pilihan dropdown Lowongan
-lowonganData.forEach(function (lowongan) {
-    var option = document.createElement("option");
-    option.text = lowongan;
-    lowonganDropdown.appendChild(option);
-});
+// Fungsi untuk validasi input tidak boleh kosong
+function validateInput(input) {
+  return input.trim() !== "";
+}
 
-// Tambahkan pilihan dropdown Posisi
-posisiData.forEach(function (posisi) {
-    var option = document.createElement("option");
-    option.text = posisi;
-    posisiDropdown.appendChild(option);
-});
+// Fungsi untuk validasi email
+function validateEmail(email) {
+  // Lakukan validasi dengan menggunakan data pendaftar yang sudah disimpan
+  const emailExists = dataPendaftar.some((pendaftar) => pendaftar.email === email);
+  return !emailExists;
+}
 
-// Menangani event saat form dikirim
-const form = document.getElementById("recruitment-form");
-const dataBody = document.getElementById("dataBody");
-form.addEventListener("submit", function (event) {
-    event.preventDefault(); // Mencegah form dikirim secara langsung
+// Fungsi untuk melakukan pendaftaran
+function daftarLowongan(fullname, email, lowongan) {
+  // Validasi input tidak boleh kosong
+  if (!validateInput(fullname) || !validateInput(email) || !validateInput(lowongan)) {
+    console.log("Harap lengkapi semua inputan.");
+    return;
+  }
 
-    // Mengambil nilai input
-    const nama = document.getElementById("fullname").value;
-    const email = document.getElementById("email").value;
-    const phone = document.getElementById("phone").value;
-    const vacancy = document.getElementById("vacancy").value;
-    const posisi = document.getElementById("posisi").value;
+  // Validasi email
+  if (!validateEmail(email)) {
+    console.log("Email yang Anda masukkan sudah terdaftar.");
+    return;
+  }
 
-    // Memvalidasi input
-    if (nama === "" || email === "" || phone === "" || vacancy === "" || posisi === "") {
-        alert("Harap isi semua kolom!");
-        return;
-    } else {
+  // Validasi kuota tersedia
+  let kuotaTersedia = 0;
+  switch (lowongan.toLowerCase()) {
+    case "system administrator":
+      kuotaTersedia = 1;
+      break;
+    case "programmer":
+      kuotaTersedia = 2;
+      break;
+    case "technical writter":
+      kuotaTersedia = 3;
+      break;
+    default:
+      console.log("Lowongan yang Anda pilih tidak valid.");
+      return;
+  }
 
-        var successMessage = document.createElement("p");
-        successMessage.className = "success";
-        successMessage.textContent = "Lamaran Anda telah terkirim!, Semoga beruntung mendapat panggilan";
-        document.body.appendChild(successMessage);
+  if (kuotaTersedia > 0) {
+    // Jika terdapat kuota yang tersedia
+    console.log(`Anda dapat memilih lowongan ${lowongan}.`);
 
-        Swal.fire({
-            icon: 'success',
-            title: 'Lamaran Terkirim!',
-            showConfirmButton: false,
-            timer: 2000 // Notifikasi akan hilang setelah 2 detik
-        });
+    // Tambahkan data pendaftar ke array
+    dataPendaftar.push({ nama: fullname, email: email, lowongan: lowongan });
 
-        // Membuat elemen <tr> dan <td> untuk setiap kolom data
-        const newRow = document.createElement("tr");
-        const namaCell = document.createElement("td");
-        const emailCell = document.createElement("td");
-        const phoneCell = document.createElement("td");
-        const vacancyCell = document.createElement("td");
-        const posisiCell = document.createElement("td");
+    kuotaTersedia--;
 
-        // Mengisi teks pada setiap elemen <td> dengan nilai yang diisi pengguna
-        namaCell.textContent = nama;
-        emailCell.textContent = email;
-        phoneCell.textContent = phone;
-        vacancyCell.textContent = vacancy;
-        posisiCell.textContent = posisi;
-
-        // Menambahkan elemen <td> ke dalam elemen <tr>
-        newRow.appendChild(namaCell);
-        newRow.appendChild(emailCell);
-        newRow.appendChild(phoneCell);
-        newRow.appendChild(vacancyCell);
-        newRow.appendChild(posisiCell);
-
-        // Menambahkan elemen <tr> ke dalam elemen <tbody>
-        dataBody.appendChild(newRow);
-
-        // Mereset form setelah berhasil ditambahkan ke dalam tabel
-        form.reset();
+    if (kuotaTersedia <= 2) {
+      // Jika kuota tersisa hanya 2 pendaftar
+      console.log(`Kuota tersisa untuk ${lowongan} hanya 2 pendaftar.`);
     }
-});
+  } else {
+    // Jika jumlah kuota sudah terpenuhi
+    console.log(`Mohon maaf, rekrutasi untuk ${lowongan} sudah penuh dan tidak dapat dipilih.`);
+  }
+}
+
+// Contoh penggunaan
+const nama = "John Doe";
+const email = "johndoe@example.com";
+const lowongan = "Programmer";
+
+daftarLowongan(nama, email, lowongan);
